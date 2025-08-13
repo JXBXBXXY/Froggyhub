@@ -69,7 +69,7 @@ function createEvent(e){
   };
   save(data);
   renderAll();
-  document.getElementById('invite').scrollIntoView({behavior:'smooth'});
+  els.inviteView.scrollIntoView({behavior:'smooth'});
 }
 
 // Onboarding
