@@ -108,14 +108,14 @@ function renderInvite(data){
   data.wishlist.forEach(item=>{
     const li = document.createElement('li');
     li.className = 'card-item';
-    li.innerHTML = \`
-      <div class="title">\${item.name}</div>
-      <div class="muted">\${item.url ? '<a href="'+item.url+'" target="_blank" rel="noopener">ссылка</a>' : ''}</div>
+    li.innerHTML = `
+      <div class="title">${item.name}</div>
+      <div class="muted">${item.url ? '<a href="'+item.url+'" target="_blank" rel="noopener">ссылка</a>' : ''}</div>
       <div class="pick">
-        <span class="badge \${item.reservedBy ? 'taken' : 'free'}">\${item.reservedBy ? 'Занято' : 'Свободно'}</span>
-        <button class="btn" data-id="\${item.id}">\${item.reservedBy ? 'Освободить' : 'Выбрать'}</button>
+        <span class="badge ${item.reservedBy ? 'taken' : 'free'}">${item.reservedBy ? 'Занято' : 'Свободно'}</span>
+        <button class="btn" data-id="${item.id}">${item.reservedBy ? 'Освободить' : 'Выбрать'}</button>
       </div>
-    \`;
+    `;
     li.querySelector('button').addEventListener('click', ()=>toggleReserve(item.id));
     els.wishlist.appendChild(li);
   });
@@ -130,8 +130,8 @@ function renderDashboard(data){
   const no = data.guests.filter(g=>g.rsvp==='no').length;
   els.sYes.textContent = yes; els.sMaybe.textContent = maybe; els.sNo.textContent = no;
 
-  els.guestList.innerHTML = data.guests.map(g=>\`<li>\${g.name} — \${g.rsvp}</li>\`).join('') || '<li class="muted">Пока пусто</li>';
-  els.giftList.innerHTML = data.wishlist.map(i=>\`<li>\${i.name} — \${i.reservedBy ? ('выбран: ' + i.reservedBy) : 'свободно'}</li>\`).join('') || '<li class="muted">Пока пусто</li>';
+  els.guestList.innerHTML = data.guests.map(g=>`<li>${g.name} — ${g.rsvp}</li>`).join('') || '<li class="muted">Пока пусто</li>';
+  els.giftList.innerHTML = data.wishlist.map(i=>`<li>${i.name} — ${i.reservedBy ? ('выбран: ' + i.reservedBy) : 'свободно'}</li>`).join('') || '<li class="muted">Пока пусто</li>';
 }
 
 function renderAll(){
