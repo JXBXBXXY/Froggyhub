@@ -175,3 +175,7 @@ els.resetEvent.addEventListener('click', ()=>{
 // init
 startOnboarding();
 renderAll();
+
+if (typeof module !== 'undefined') {
+  module.exports = { parseManualWishlist };
+}
