@@ -292,7 +292,7 @@ function setScene(scene){
   body.classList.remove('scene-intro','scene-pond','scene-final');
   body.classList.add(`scene-${scene}`);
   document.getElementById('slides').style.display=(scene==='pond')?'block':'none';
-  // Реплики видимы только в intro/final (скрыты в CSS для pond)
+  // Реплики скрываем/показываем через JS (speech.style.display) при смене сцен
   speech.style.display=(scene==='pond')?'none':'block';
 }
 
