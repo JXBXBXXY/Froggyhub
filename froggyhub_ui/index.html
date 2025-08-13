@@ -392,7 +392,7 @@ function renderAdmin(){
   const html=(eventData.wishlist.filter(i=>i.title||i.url).map(i=>`${i.title||'Подарок'} — ${i.claimedBy?'🔒 занято':'🟢 свободно'} ${i.url?`• <a href="${i.url}" target="_blank">ссылка</a>`:''}`)).map(s=>`<li>${s}</li>`).join('');
   adminGifts.innerHTML=html||'<li>Вишлист пуст</li>';
 }
-finishCreate.onclick=()=>withTransition(()=>toFinalScene());
+finishCreate.onclick=()=>withTransition(()=>toFinalScene('host'));
 
 /* JOIN: код → RSVP */
 joinCodeBtn.onclick=()=>{
@@ -441,18 +441,30 @@ function renderGuestWishlist(){
   }));
 }
 
-skipWishlist.onclick=()=>withTransition(()=>toFinalScene());
-toGuestFinal.onclick=()=>withTransition(()=>toFinalScene());
+skipWishlist.onclick=()=>withTransition(()=>toFinalScene('guest'));
+toGuestFinal.onclick=()=>withTransition(()=>toFinalScene('guest'));
 
 /* ФИНАЛ — лягушка снова на пне, краткая сводка */
-function toFinalScene(){
+function toFinalScene(role){
   setScene('final'); frog.style.left='50%'; frog.style.top='42%'; croak();
   const q=encodeURIComponent(eventData.address||''), addr=eventData.address?`<a style="color:#fff" href="https://www.google.com/maps/search/?api=1&query=${q}" target="_blank" rel="noopener">${eventData.address}</a>`:'—';
   const chosenCount=eventData.wishlist.filter(i=>i.claimedBy).length, totalWishes=eventData.wishlist.filter(i=>i.title||i.url).length, freeCount=totalWishes-chosenCount;
+  let extra='';
+  if(role==='guest'){
+    const g=eventData.guests.find(x=>x.name&&x.name.toLowerCase()===currentGuestName.toLowerCase());
+    const gift=eventData.wishlist.find(i=>i.claimedBy&&i.claimedBy.toLowerCase()===currentGuestName.toLowerCase());
+    const rsvp=g?g.rsvp:'—';
+    const giftTitle=gift?gift.title||'Подарок':'—';
+    extra=`<br>🙋‍♂️ Ваш статус: ${rsvp}<br>🎁 Ваш выбор: ${giftTitle}`;
+  }
   speech.style.display='block';
-  speechText.innerHTML=`<strong>${eventData.title||'Событие'}</strong><br>📅 ${eventData.date||'—'} • ⏰ ${eventData.time||'—'} • 📍 ${addr}<br>👗 ${eventData.dress||'—'} • 🧺 ${eventData.bring||'—'}<br>🎁 Пожелания: занято ${chosenCount} • свободно ${freeCount}<br>До начала: <span id="countdown">—</span>`;
-  document.getElementById('speechActions').innerHTML=`<button class="pill secondary" id="backToPond">Назад</button>`;
-  backToPond.onclick=()=>withTransition(()=>{ setScene('pond'); showSlide('admin'); renderPads(stepsCreate.length); frogJumpToPad(3,true); renderAdmin(); });
+  speechText.innerHTML=`<strong>${eventData.title||'Событие'}</strong><br>📅 ${eventData.date||'—'} • ⏰ ${eventData.time||'—'} • 📍 ${addr}<br>👗 ${eventData.dress||'—'} • 🧺 ${eventData.bring||'—'}<br>🎁 Пожелания: занято ${chosenCount} • свободно ${freeCount}${extra}<br>До начала: <span id="countdown">—</span>`;
+  if(role==='host'){
+    document.getElementById('speechActions').innerHTML=`<button class="pill secondary" id="toAdmin">Администрирование</button>`;
+    document.getElementById('toAdmin').onclick=()=>withTransition(()=>{ setScene('pond'); showSlide('admin'); renderPads(stepsCreate.length); frogJumpToPad(3,true); renderAdmin(); });
+  } else {
+    document.getElementById('speechActions').innerHTML='';
+  }
 
   function tick(){ const out=document.getElementById('countdown'); if(!eventData.date||!eventData.time){ out.textContent='—'; return; }
     const t=new Date(`${eventData.date}T${eventData.time}`)-new Date(); if(t<=0){ out.textContent='началось!'; return; }
