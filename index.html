@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>FroggyHub</title>
+</head>
+<body>
+  <h1>FroggyHub</h1>
+  <section id="create">
+    <h2>Create Event</h2>
+    <input id="title" placeholder="Title" />
+    <button id="createBtn">Create</button>
+    <div id="created"></div>
+  </section>
+
+  <section id="join">
+    <h2>Join by Code</h2>
+    <input id="code" placeholder="CODE" />
+    <button id="joinBtn">Join</button>
+    <div id="event"></div>
+  </section>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    const tg = window.Telegram?.WebApp; tg?.ready(); tg?.expand();
+    async function api(path, opts={}) {
+      const initData = tg?.initData || '';
+      const res = await fetch('/api'+path, {
+        method: opts.method || 'GET',
+        headers: {'Content-Type':'application/json','X-Telegram-Init-Data':initData},
+        body: opts.body ? JSON.stringify(opts.body) : undefined
+      });
+      return res.json();
+    }
+
+    document.getElementById('createBtn').onclick = async () => {
+      const title = document.getElementById('title').value;
+      const ev = await api('/events', {method:'POST', body:{title}});
+      document.getElementById('created').textContent = ev.share_code || ev.error?.message;
+    };
+
+    document.getElementById('joinBtn').onclick = async () => {
+      const code = document.getElementById('code').value;
+      const data = await api('/events/by-code/' + code);
+      if(data.error){ document.getElementById('event').textContent = data.error.message; return; }
+      const list = document.createElement('ul');
+      data.items.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item.title + (item.reserved ? ' (taken)' : '');
+        if(!item.reserved){
+          const btn = document.createElement('button');
+          btn.textContent = 'Claim';
+          btn.onclick = async () => {
+            await api('/items/'+item.id+'/claim', {method:'POST'});
+            document.getElementById('joinBtn').click();
+          };
+          li.appendChild(btn);
+        } else if(item.claimed_by_me){
+          const btn = document.createElement('button');
+          btn.textContent = 'Unclaim';
+          btn.onclick = async () => {
+            await api('/items/'+item.id+'/unclaim', {method:'POST'});
+            document.getElementById('joinBtn').click();
+          };
+          li.appendChild(btn);
+        }
+        list.appendChild(li);
+      });
+      const div = document.getElementById('event');
+      div.innerHTML = '';
+      div.appendChild(list);
+    };
+  </script>
+</body>
+</html>
